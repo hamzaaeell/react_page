@@ -1,0 +1,33 @@
+name: Deploy to Server
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v2
+
+      - name: Show deployment contents
+        run: ls -A
+
+      - name: Start SSH Agent
+        uses: webfactory/ssh-agent@v0.5.3
+        with:
+          ssh-private-key: ${{ secrets.SSH_KEY }}
+
+      - name: Add server to known hosts
+        run: |
+          mkdir -p $HOME/.ssh
+          ssh-keyscan "${{ secrets.SERVER_IP }}" >> $HOME/.ssh/known_hosts
+          chmod 600 $HOME/.ssh/known_hosts
+
+
+      - name: Copy index.html to server
+        run: |
+          scp index.html root@${{ secrets.SERVER_IP }}:/root/web
