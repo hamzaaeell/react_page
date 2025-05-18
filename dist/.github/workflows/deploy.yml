@@ -13,25 +13,21 @@ jobs:
       - name: Checkout Repository
         uses: actions/checkout@v2
 
-      - name: Install Node.js and Build React App
-        uses: actions/setup-node@v3
-        with:
-          node-version: 18
-
-      - run: |
-          npm install
-          npm run build
+      - name: Show deployment contents
+        run: ls -A
 
       - name: Start SSH Agent
         uses: webfactory/ssh-agent@v0.5.3
         with:
           ssh-private-key: ${{ secrets.SSH_KEY }}
 
-      - name: Add Server to known_hosts
+      - name: Add server to known hosts
         run: |
-          mkdir -p ~/.ssh
-          ssh-keyscan "${{ secrets.SERVER_IP }}" >> ~/.ssh/known_hosts
+          mkdir -p $HOME/.ssh
+          ssh-keyscan "${{ secrets.SERVER_IP }}" >> $HOME/.ssh/known_hosts
+          chmod 600 $HOME/.ssh/known_hosts
 
-      - name: Copy React Build to Server
+      - name: Copy files to server (React build)
         run: |
-          scp -r dist/* root@${{ secrets.SERVER_IP }}:/root/react/frontpage/
+          mkdir -p dist
+          scp -r dist/* ubuntu@${{ secrets.SERVER_IP }}:/home/ubuntu/react/frontpage/
