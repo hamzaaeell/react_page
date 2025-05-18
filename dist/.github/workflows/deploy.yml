@@ -10,11 +10,19 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout Repository
+      - name: Checkout repository
         uses: actions/checkout@v2
 
-      - name: Show deployment contents
-        run: ls -A
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '18'
+
+      - name: Install dependencies and build React app
+        working-directory: react/frontpage
+        run: |
+          npm install
+          npm run build
 
       - name: Start SSH Agent
         uses: webfactory/ssh-agent@v0.5.3
@@ -24,10 +32,9 @@ jobs:
       - name: Add server to known hosts
         run: |
           mkdir -p $HOME/.ssh
-          ssh-keyscan "${{ secrets.SERVER_IP }}" >> $HOME/.ssh/known_hosts
+          ssh-keyscan -H ${{ secrets.SERVER_IP }} >> $HOME/.ssh/known_hosts
           chmod 600 $HOME/.ssh/known_hosts
 
-      - name: Copy files to server (React build)
+      - name: Copy built files to server
         run: |
-          mkdir -p dist
-          scp -r dist/* ubuntu@${{ secrets.SERVER_IP }}:/home/ubuntu/react/frontpage/
+          scp -r react/frontpage/build/* ubuntu@${{ secrets.SERVER_IP }}:/home/ubuntu/react/frontpage/
