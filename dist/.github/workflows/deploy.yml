@@ -35,6 +35,12 @@ jobs:
           ssh-keyscan -H ${{ secrets.SERVER_IP }} >> $HOME/.ssh/known_hosts
           chmod 600 $HOME/.ssh/known_hosts
 
+      - name: Create target directory on server
+        run: |
+          ssh ubuntu@${{ secrets.SERVER_IP }} "mkdir -p /home/ubuntu/react/frontpage"
+
       - name: Copy built files to server
         run: |
           scp -r react/frontpage/build/* ubuntu@${{ secrets.SERVER_IP }}:/home/ubuntu/react/frontpage/
+
+          
