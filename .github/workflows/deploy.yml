@@ -1,38 +1,49 @@
 name: Deploy React Frontpage to Server
+
 on:
   push:
     branches: [ main ]
+
 jobs:
   deploy:
     runs-on: ubuntu-latest
+
     steps:
       - name: Checkout repository
         uses: actions/checkout@v2
+
       - name: Setup Node.js
         uses: actions/setup-node@v3
         with:
           node-version: '18'
-      - name: Debug: show workspace
+
+      - name: Debug - show workspace
         run: |
           echo "GITHUB_WORKSPACE = $GITHUB_WORKSPACE"
           pwd
           ls -R .
+
       - name: Install dependencies and build React app
+        working-directory: ./react/frontpage   # CHANGE THIS if your package.json is in a subfolder
         run: |
           npm install
           npm run build
+
       - name: Start SSH Agent
         uses: webfactory/ssh-agent@v0.5.3
         with:
-          ssh-private-key: ${{ secrets.SSH_KEY }}
+          ssh-private-key: ${{ secrets.SSH_KEY }}  # Make sure SSH_KEY is correctly added in GitHub secrets
+
       - name: Add server to known hosts
         run: |
           mkdir -p $HOME/.ssh
           ssh-keyscan -H ${{ secrets.SERVER_IP }} >> $HOME/.ssh/known_hosts
           chmod 600 $HOME/.ssh/known_hosts
+
       - name: Create target directory on server
         run: |
           ssh ubuntu@${{ secrets.SERVER_IP }} "mkdir -p /home/ubuntu/react/frontpage"
+
       - name: Copy built files to server
         run: |
-          scp -r dist/* ubuntu@${{ secrets.SERVER_IP }}:/home/ubuntu/react/frontpage/
+          scp -r react/frontpage/build/* ubuntu@${{ secrets.SERVER_IP }}:/home/ubuntu/react/frontpage/
