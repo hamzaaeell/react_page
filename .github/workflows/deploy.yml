@@ -17,33 +17,35 @@ jobs:
         with:
           node-version: '18'
 
-      - name: Debug - show workspace
+      - name: Debug workspace
         run: |
-          echo "GITHUB_WORKSPACE = $GITHUB_WORKSPACE"
+          echo "WORKSPACE: $GITHUB_WORKSPACE"
           pwd
           ls -R .
 
-      - name: Install dependencies and build React app
-        working-directory: ./react/frontpage   # CHANGE THIS if your package.json is in a subfolder
+      - name: Install dependencies & build
         run: |
-          npm install
+          npm ci
           npm run build
+        # -> outputs into build/ per your vite.config.js
 
       - name: Start SSH Agent
         uses: webfactory/ssh-agent@v0.5.3
         with:
-          ssh-private-key: ${{ secrets.SSH_KEY }}  # Make sure SSH_KEY is correctly added in GitHub secrets
+          ssh-private-key: ${{ secrets.SSH_KEY }}
 
       - name: Add server to known hosts
         run: |
-          mkdir -p $HOME/.ssh
-          ssh-keyscan -H ${{ secrets.SERVER_IP }} >> $HOME/.ssh/known_hosts
-          chmod 600 $HOME/.ssh/known_hosts
+          mkdir -p ~/.ssh
+          ssh-keyscan -H "${{ secrets.SERVER_IP }}" >> ~/.ssh/known_hosts
+          chmod 600 ~/.ssh/known_hosts
 
-      - name: Create target directory on server
+      - name: Ensure target dir exists
         run: |
-          ssh ubuntu@${{ secrets.SERVER_IP }} "mkdir -p /home/ubuntu/react/frontpage"
+          ssh ubuntu@${{ secrets.SERVER_IP }} \
+            "mkdir -p /home/ubuntu/react/frontpage"
 
       - name: Copy built files to server
         run: |
-          scp -r react/frontpage/build/* ubuntu@${{ secrets.SERVER_IP }}:/home/ubuntu/react/frontpage/
+          scp -r build/* \
+            ubuntu@${{ secrets.SERVER_IP }}:/home/ubuntu/react/frontpage/
