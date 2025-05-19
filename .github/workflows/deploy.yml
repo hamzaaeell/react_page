@@ -15,6 +15,12 @@ jobs:
         with:
           node-version: '18'
 
+      - name: Debug: show workspace
+        run: |
+          echo "GITHUB_WORKSPACE = $GITHUB_WORKSPACE"
+          pwd
+          ls -R .
+
       - name: Install dependencies and build React app
         run: |
           npm install
@@ -22,7 +28,7 @@ jobs:
 
       - uses: webfactory/ssh-agent@v0.5.3
         with:
-          ssh-private-key: ${{ secrets.SSH_KaEY }}
+          ssh-private-key: ${{ secrets.SSH_KEY }}
 
       - name: Add server to known hosts
         run: |
