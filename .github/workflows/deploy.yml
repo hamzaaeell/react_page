@@ -2,19 +2,16 @@ name: Deploy React Frontpage to Server
 
 on:
   push:
-    branches:
-      - main
+    branches: [ main ]
 
 jobs:
   deploy:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v2
+      - uses: actions/checkout@v2
 
-      - name: Setup Node.js
-        uses: actions/setup-node@v3
+      - uses: actions/setup-node@v3
         with:
           node-version: '18'
 
@@ -23,8 +20,7 @@ jobs:
           npm install
           npm run build
 
-      - name: Start SSH Agent
-        uses: webfactory/ssh-agent@v0.5.3
+      - uses: webfactory/ssh-agent@v0.5.3
         with:
           ssh-private-key: ${{ secrets.SSH_KaEY }}
 
@@ -40,5 +36,4 @@ jobs:
 
       - name: Copy built files to server
         run: |
-          scp -r build/* ubuntu@${{ secrets.SERVER_IP }}:/home/ubuntu/react/frontpage/
-          
+          scp -r dist/* ubuntu@${{ secrets.SERVER_IP }}:/home/ubuntu/react/frontpage/
