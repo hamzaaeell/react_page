@@ -19,7 +19,7 @@ jobs:
           node-version: '18'
 
       - name: Install dependencies and build React app
-        working-directory: react/frontpage
+        working-directory: .
         run: |
           npm install
           npm run build
@@ -27,7 +27,7 @@ jobs:
       - name: Start SSH Agent
         uses: webfactory/ssh-agent@v0.5.3
         with:
-          ssh-private-key: ${{ secrets.SSH_KEY }}
+          ssh-private-key: ${{ secrets.SSH_KaEY }}
 
       - name: Add server to known hosts
         run: |
@@ -41,6 +41,5 @@ jobs:
 
       - name: Copy built files to server
         run: |
-          scp -r react/frontpage/build/* ubuntu@${{ secrets.SERVER_IP }}:/home/ubuntu/react/frontpage/
-
+          scp -r build/* ubuntu@${{ secrets.SERVER_IP }}:/home/ubuntu/react/frontpage/
           
